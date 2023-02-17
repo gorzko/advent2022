@@ -1,6 +1,8 @@
 import unittest
 import day4
 from day4 import contains
+import day5
+from day5 import Procedure
 
 
 class TestsDay4(unittest.TestCase):
@@ -46,6 +48,24 @@ class TestsDay4(unittest.TestCase):
 
     def test_not_contained_equal(self):
         self.assertFalse(contains((81, 81), (39, 39)))
+
+class TestsDay5(unittest.TestCase):
+
+    def test_read_file(self):
+        stacks = dict()
+        stacks[1] = ['[Z]', '[N]']
+        stacks[2] = ['[M]', '[C]', '[D]']
+        stacks[3] = ['[P]']
+
+        procedure = [Procedure(2,1,1), Procedure(1,3,3), Procedure(2,2,1), Procedure(1,1,2)]
+        self.assertEqual(day5.read_file('day5t.txt'), (stacks, procedure))
+
+    def test_day5_1(self):
+        stacks = dict()
+        stacks[1] = ['[C]']
+        stacks[2] = ['[M]']
+        stacks[3] = ['[P]', '[D]', '[N]', '[Z]']
+        self.assertEqual(day5.day5_1('day5t.txt'), stacks)
 
 if __name__ == '__main__':
     unittest.main()
