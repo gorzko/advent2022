@@ -61,11 +61,10 @@ class TestsDay5(unittest.TestCase):
         self.assertEqual(day5.read_file('day5t.txt'), (stacks, procedure))
 
     def test_day5_1(self):
-        stacks = dict()
-        stacks[1] = ['[C]']
-        stacks[2] = ['[M]']
-        stacks[3] = ['[P]', '[D]', '[N]', '[Z]']
-        self.assertEqual(day5.day5_1('day5t.txt'), stacks)
+        self.assertEqual(day5.day5_1('day5t.txt'), 'CMZ')
+
+    def test_day5_2(self):
+        self.assertEqual(day5.day5_2('day5t.txt'), 'MCD')
 
 if __name__ == '__main__':
     unittest.main()
