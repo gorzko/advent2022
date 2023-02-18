@@ -108,7 +108,13 @@ def day7_1(file: str):
     below_100k = [d.total_size() for d in directories if d.total_size() <= 100000]
     return sum(below_100k)
 
-
+def day7_2(file: str):
+    total_space = 70000000
+    update_size = 30000000
+    directories = read_file(file)
+    free_space = total_space - directories[0].total_size()
+    big_enough = [d.total_size() for d in directories if d.total_size() >= update_size - free_space]
+    return min(big_enough)
 
 if __name__ == "__main__":
-    print(day7_1("day7.txt"))
+    print(day7_2("day7.txt"))

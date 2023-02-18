@@ -126,5 +126,8 @@ class TestDay7(unittest.TestCase):
     def test_day7_1(self):
         self.assertEqual(day7.day7_1('day7t.txt'), 95437)
 
+    def test_day7_2(self):
+        self.assertEqual(day7.day7_2('day7t.txt'), 24933642)
+
 if __name__ == '__main__':
     unittest.main()
