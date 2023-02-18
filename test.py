@@ -4,7 +4,8 @@ from day4 import contains
 import day5
 from day5 import Procedure
 import day6
-
+import day7
+from day7 import Directory, DirectoriesCollection
 
 class TestsDay4(unittest.TestCase):
 
@@ -94,6 +95,36 @@ class TestDay6(unittest.TestCase):
 
     def test_day6_2e(self):
         self.assertEqual(day6.day6('zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw', 14), 26)
+
+class TestDay7(unittest.TestCase):
+
+    def test_read_file(self):
+        main = Directory('/', DirectoriesCollection())
+        a = Directory('a', DirectoriesCollection())
+        e = Directory('e', DirectoriesCollection())
+        d = Directory('d', DirectoriesCollection())
+        main.add_child(a)
+        main.add_child(d)
+        a.add_child(e)
+        e.add_file(('i', 584))
+        a.add_file(('f', 29116))
+        a.add_file(('g', 2557))
+        a.add_file(('h.lst', 62596))
+        main.add_file(('b.txt', 14848514))
+        main.add_file(('c.dat', 8504156))
+        d.add_file(('j', 4060174))
+        d.add_file(('d.log', 8033020))
+        d.add_file(('d.ext', 5626152))
+        d.add_file(('k', 7214296))
+        directories = DirectoriesCollection()
+        directories.add(main)
+        directories.add(a)
+        directories.add(e)
+        directories.add(d)
+        self.assertEqual(day7.read_file('day7t.txt'), directories)
+
+    def test_day7_1(self):
+        self.assertEqual(day7.day7_1('day7t.txt'), 95437)
 
 if __name__ == '__main__':
     unittest.main()
