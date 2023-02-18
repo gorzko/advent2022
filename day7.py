@@ -45,11 +45,9 @@ directories count={repr(len(self.directories))}, parent={repr(self.parent.name i
 
 class DirectoriesCollection:
     directories: [Directory]
-    iteration: int
 
     def __init__(self):
         self.directories = []
-        iteration = -1
     def add(self, directory: Directory):
         self.directories.append(directory)
     def contains(self, name: str):
