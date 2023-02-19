@@ -6,6 +6,7 @@ from day5 import Procedure
 import day6
 import day7
 from day7 import Directory, DirectoriesCollection
+import day8
 
 class TestsDay4(unittest.TestCase):
 
@@ -129,5 +130,37 @@ class TestDay7(unittest.TestCase):
     def test_day7_2(self):
         self.assertEqual(day7.day7_2('day7t.txt'), 24933642)
 
+class TestDay8(unittest.TestCase):
+    l = [[3, 0, 3, 7, 3],
+         [2, 5, 5, 1, 2],
+         [6, 5, 3, 3, 2],
+         [3, 3, 5, 4, 9],
+         [3, 5, 3, 9, 0]]
+    def test_read_file(self):
+        self.assertEqual(day8.read_file('day8t.txt'), self.l)
+
+    def test_check_vertically1(self):
+        self.assertTrue(day8.check_vertically(self.l, 1, 2))
+
+    def test_check_vertically2(self):
+        self.assertFalse(day8.check_vertically(self.l, 2, 1))
+
+    def test_check_vertically3(self):
+        self.assertFalse(day8.check_vertically(self.l, 2, 2))
+
+    def test_check_vertically4(self):
+        self.assertFalse(day8.check_vertically(self.l, 3, 1))
+
+    def test_check_vertically5(self):
+        self.assertFalse(day8.check_vertically(self.l, 3, 3))
+
+    def test_check_vertically6(self):
+        self.assertTrue(day8.check_vertically(self.l, 3, 2))
+
+    def test_count_visible(self):
+        self.assertEqual(day8.count_visible(self.l), 5)
+
+    def test_day8_1(self):
+        self.assertEqual(day8.day8_1('day8t.txt'), 21)
 if __name__ == '__main__':
     unittest.main()
