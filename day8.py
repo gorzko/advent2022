@@ -6,9 +6,8 @@ def read_file(file: str):
     grid = [list(map(int, x)) for x in grid]
     return grid
 
-def check_vertically(grid: list[int], row: int, column: int):
+def check_vertically(grid: list[list[int]], row: int, column: int):
     last_row = len(grid) - 1
-    last_column = len(grid[0]) - 1
     visible = True
     for r in range(0, row):
         if grid[r][column] >= grid[row][column]:
@@ -21,7 +20,8 @@ def check_vertically(grid: list[int], row: int, column: int):
                 visible = False
                 break
     return visible
-def count_visible(grid: list[int]):
+
+def count_visible(grid: list[list[int]]):
     visible = 0
     last_row = len(grid) - 1
     last_column = len(grid[0]) - 1
@@ -30,8 +30,6 @@ def count_visible(grid: list[int]):
             if len([x for x in grid[r][0:c] if x >= grid[r][c]]) == 0 or \
                 len([x for x in grid[r][c+1:last_column+1] if x >= grid[r][c]]) == 0 or \
                 check_vertically(grid, r, c) :
-                # print((r))
-                # print(r[c])
                 visible += 1
             else:
                 pass
@@ -47,12 +45,48 @@ def day8_1(file: str):
 
     return visible
 
+def calculate_scenic_score(grid: list[list[int]], row: int, col: int):
+    left = 0
+    right = 0
+    up = 0
+    down = 0
+    score = 0
+    value = grid[row][col]
+    last_row = len(grid)
+    last_column = len(grid[0])
+
+    for c in range(col - 1, -1, -1):
+        score += 1
+        if grid[row][c] >= value:
+            break
+    left, score = score, 0
+
+    for c in range(col + 1, last_column):
+        score += 1
+        if grid[row][c] >= value:
+            break
+    right, score = score, 0
+
+    for r in range(row - 1, -1, -1):
+        score += 1
+        if grid[r][col] >= value:
+            break
+    up, score = score, 0
+
+    for r in range(row + 1, last_row):
+        score += 1
+        if grid[r][col] >= value:
+            break
+    down = score
+
+    return left * right * up * down
+
 
 if __name__ == "__main__":
-    #print(day8_1("day8t.txt"))
+    # print(day8_1("day8.txt"))
     l = [[3, 0, 3, 7, 3],
          [2, 5, 5, 1, 2],
          [6, 5, 3, 3, 2],
          [3, 3, 5, 4, 9],
          [3, 5, 3, 9, 0]]
-    print(count_visible(l))
+    print(calculate_scenic_score(l, 1, 2))

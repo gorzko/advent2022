@@ -162,5 +162,15 @@ class TestDay8(unittest.TestCase):
 
     def test_day8_1(self):
         self.assertEqual(day8.day8_1('day8t.txt'), 21)
+
+    def test_calculate_scenic_score1(self):
+        self.assertEqual(day8.calculate_scenic_score(self.l, 1, 2), 4)
+
+    def test_calculate_scenic_score2(self):
+        self.assertEqual(day8.calculate_scenic_score(self.l, 3, 2), 8)
+
+    def test_calculate_scenic_score3(self):
+        self.assertEqual(day8.calculate_scenic_score(self.l, 3, 4), 0)
+
 if __name__ == '__main__':
     unittest.main()
