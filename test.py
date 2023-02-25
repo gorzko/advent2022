@@ -7,6 +7,7 @@ import day6
 import day7
 from day7 import Directory, DirectoriesCollection
 import day8
+import day9
 
 class TestsDay4(unittest.TestCase):
 
@@ -171,6 +172,14 @@ class TestDay8(unittest.TestCase):
 
     def test_calculate_scenic_score3(self):
         self.assertEqual(day8.calculate_scenic_score(self.l, 3, 4), 0)
+
+    def test_day_8_2(self):
+        self.assertEqual(day8.day8_2('day8t.txt'), 8)
+
+class TestDay9(unittest.TestCase):
+
+    def test_day9_1(self):
+        self.assertEqual(day9.day9_1('day9t.txt'), ((3, 3), (2, 3), 13))
 
 if __name__ == '__main__':
     unittest.main()

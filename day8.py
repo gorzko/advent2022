@@ -81,12 +81,19 @@ def calculate_scenic_score(grid: list[list[int]], row: int, col: int):
 
     return left * right * up * down
 
+def day8_2(file: str):
+    grid = read_file(file)
+    last_row = len(grid) - 1
+    last_column = len(grid[0]) - 1
+    max_scenic_score = 0
+
+    for r in range(1, last_row):
+        for c in range(1, last_column):
+            score = calculate_scenic_score(grid, r, c)
+            if score > max_scenic_score:
+                max_scenic_score = score
+
+    return max_scenic_score
 
 if __name__ == "__main__":
-    # print(day8_1("day8.txt"))
-    l = [[3, 0, 3, 7, 3],
-         [2, 5, 5, 1, 2],
-         [6, 5, 3, 3, 2],
-         [3, 3, 5, 4, 9],
-         [3, 5, 3, 9, 0]]
-    print(calculate_scenic_score(l, 1, 2))
+    print(day8_2("day8.txt"))
