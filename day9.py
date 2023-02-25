@@ -39,27 +39,37 @@ class Knot:
 
 
 class Rope:
-    head: Knot
-    tail: Knot
+    knots: list
 
-    def __init__(self):
-        self.head = Knot()
-        self.tail = Knot()
+    def __init__(self, knots):
+        self.knots = [Knot() for i in range(0, knots)]
 
     def move_horizontally(self, x):
-        self.head.move(x, 0)
-        horizontal_distance, vertical_distance = self.head.get_distance(self.tail)
-        if abs(horizontal_distance) == 2:
-            self.tail.move(x, vertical_distance)
+        self.knots[0].move(x, 0)
+        for i in range(0, len(self.knots) - 1):
+            head, tail = self.knots[i], self.knots[i+1]
+            horizontal_distance, vertical_distance = head.get_distance(tail)
+            if abs(horizontal_distance) == 2:
+                tail.move(x, vertical_distance)
 
     def move_vertically(self, y):
-        self.head.move(0, y)
-        horizontal_distance, vertical_distance = self.head.get_distance(self.tail)
-        if abs(vertical_distance) == 2:
-            self.tail.move(horizontal_distance, y)
+        self.knots[0].move(0, y)
+        for i in range(0, len(self.knots) - 1):
+            head, tail = self.knots[i], self.knots[i+1]
+            horizontal_distance, vertical_distance = head.get_distance(tail)
+            if abs(vertical_distance) == 2:
+                tail.move(horizontal_distance, y)
+
+    @property
+    def head(self):
+        return self.knots[0]
+
+    @property
+    def tail(self):
+        return self.knots[-1]
 
 def day9_1(file: str):
-    rope = Rope()
+    rope = Rope(2)
     with open('input\\' + file, 'r') as f:
         for line in f:
             line = line.strip()
@@ -74,7 +84,6 @@ def day9_1(file: str):
                         rope.move_vertically(1)
                     case "D":
                         rope.move_vertically(-1)
-                rope.tail.log_position()
     return rope.head.get_current_position(), rope.tail.get_current_position(), rope.tail.count_positions()
 
 
