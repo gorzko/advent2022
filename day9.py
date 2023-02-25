@@ -29,14 +29,6 @@ class Knot:
         self.y += y
         self.log_position()
 
-    def align_horizontally(self, other):
-        self.x = other.x
-        self.log_position()
-
-    def align_vertically(self, other):
-        self.y = other.y
-        self.log_position()
-
 
 class Rope:
     knots: list
@@ -49,16 +41,24 @@ class Rope:
         for i in range(0, len(self.knots) - 1):
             head, tail = self.knots[i], self.knots[i+1]
             horizontal_distance, vertical_distance = head.get_distance(tail)
-            if abs(horizontal_distance) == 2:
+            if abs(horizontal_distance) == 2 and vertical_distance == 0:
                 tail.move(x, vertical_distance)
+            elif abs(horizontal_distance) == 2 or abs(vertical_distance) == 2:
+                x = horizontal_distance / abs(horizontal_distance) if horizontal_distance != 0 else 0
+                y = vertical_distance / abs(vertical_distance) if vertical_distance != 0 else 0
+                tail.move(x, y)
 
     def move_vertically(self, y):
         self.knots[0].move(0, y)
         for i in range(0, len(self.knots) - 1):
             head, tail = self.knots[i], self.knots[i+1]
             horizontal_distance, vertical_distance = head.get_distance(tail)
-            if abs(vertical_distance) == 2:
+            if abs(vertical_distance) == 2 and horizontal_distance == 0:
                 tail.move(horizontal_distance, y)
+            elif abs(horizontal_distance) == 2 or abs(vertical_distance) == 2:
+                x = horizontal_distance / abs(horizontal_distance) if horizontal_distance != 0 else 0
+                y = vertical_distance / abs(vertical_distance) if vertical_distance != 0 else 0
+                tail.move(x, y)
 
     @property
     def head(self):
@@ -68,13 +68,21 @@ class Rope:
     def tail(self):
         return self.knots[-1]
 
-def day9_1(file: str):
-    rope = Rope(2)
+    def get_coordinates(self):
+        for knot in self.knots:
+            index = self.knots.index(knot)
+            index = index if index > 0 else 'H'
+            print(f'Object index: {index}, x: {knot.x}, y: {knot.y}')
+
+def day9(file: str, knots: int):
+    rope = Rope(knots)
     with open('input\\' + file, 'r') as f:
         for line in f:
+            # print('Line #')
             line = line.strip()
             direction, steps = line[0], int(line[2:])
             for i in range(1, steps + 1):
+                # print (f'Step {i}')
                 match direction:
                     case "R":
                         rope.move_horizontally(1)
@@ -84,8 +92,9 @@ def day9_1(file: str):
                         rope.move_vertically(1)
                     case "D":
                         rope.move_vertically(-1)
+                # rope.get_coordinates()
     return rope.head.get_current_position(), rope.tail.get_current_position(), rope.tail.count_positions()
 
 
 if __name__ == "__main__":
-    print(day9_1("day9.txt"))
+    print(day9("day9.txt", 10))
