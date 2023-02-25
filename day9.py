@@ -20,8 +20,8 @@ class Knot:
         return self.x, self.y
 
     def get_distance(self, other):
-        horizontal_distance = abs(self.x - other.x)
-        vertical_distance = abs(self.y - other.y)
+        horizontal_distance = self.x - other.x
+        vertical_distance = self.y - other.y
         return horizontal_distance, vertical_distance
 
     def move(self, x, y):
@@ -46,38 +46,17 @@ class Rope:
         self.head = Knot()
         self.tail = Knot()
 
-    def move_right(self):
-        self.head.move(1, 0)
+    def move_horizontally(self, x):
+        self.head.move(x, 0)
         horizontal_distance, vertical_distance = self.head.get_distance(self.tail)
-        if horizontal_distance == 2:
-            self.tail.move(1, 0)
-            if vertical_distance > 0:
-                self.tail.align_vertically(self.head)
+        if abs(horizontal_distance) == 2:
+            self.tail.move(x, vertical_distance)
 
-    def move_left(self):
-        self.head.x -= 1
+    def move_vertically(self, y):
+        self.head.move(0, y)
         horizontal_distance, vertical_distance = self.head.get_distance(self.tail)
-        if horizontal_distance == 2:
-            self.tail.x -= 1
-            if vertical_distance > 0:
-                self.tail.y = self.head.y
-
-    def move_up(self):
-        self.head.y += 1
-        horizontal_distance, vertical_distance = self.head.get_distance(self.tail)
-        if vertical_distance == 2:
-            self.tail.y += 1
-            if horizontal_distance > 0:
-                self.tail.x = self.head.x
-
-    def move_down(self):
-        self.head.y -= 1
-        horizontal_distance, vertical_distance = self.head.get_distance(self.tail)
-        if vertical_distance == 2:
-            self.tail.y -= 1
-            if horizontal_distance > 0:
-                self.tail.x = self.head.x
-
+        if abs(vertical_distance) == 2:
+            self.tail.move(horizontal_distance, y)
 
 def day9_1(file: str):
     rope = Rope()
@@ -88,13 +67,13 @@ def day9_1(file: str):
             for i in range(1, steps + 1):
                 match direction:
                     case "R":
-                        rope.move_right()
+                        rope.move_horizontally(1)
                     case "L":
-                        rope.move_left()
+                        rope.move_horizontally(-1)
                     case "U":
-                        rope.move_up()
+                        rope.move_vertically(1)
                     case "D":
-                        rope.move_down()
+                        rope.move_vertically(-1)
                 rope.tail.log_position()
     return rope.head.get_current_position(), rope.tail.get_current_position(), rope.tail.count_positions()
 
