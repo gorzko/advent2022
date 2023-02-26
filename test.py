@@ -208,8 +208,8 @@ class TestDay11(unittest.TestCase):
     def test_day11_1(self):
         self.assertEqual(day11.day11('day11t.txt', 20, 3), 10605)
 
-    # def test_day11_2(self):
-    #     self.assertEqual(day11.day11('day11t.txt', 10000, 0), 2713310158)
+    def test_day11_2(self):
+        self.assertEqual(day11.day11('day11t.txt', 10000, 0), 2713310158)
 
 if __name__ == '__main__':
     unittest.main()
