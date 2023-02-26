@@ -9,6 +9,7 @@ from day7 import Directory, DirectoriesCollection
 import day8
 import day9
 import day10
+import day11
 
 class TestsDay4(unittest.TestCase):
 
@@ -201,6 +202,14 @@ class TestDay10(unittest.TestCase):
 ######......######......######......####\n\
 #######.......#######.......#######.....\n'
         self.assertEqual(day10.day10_2('day10t.txt'), output)
+
+class TestDay11(unittest.TestCase):
+
+    def test_day11_1(self):
+        self.assertEqual(day11.day11('day11t.txt', 20, 3), 10605)
+
+    # def test_day11_2(self):
+    #     self.assertEqual(day11.day11('day11t.txt', 10000, 0), 2713310158)
 
 if __name__ == '__main__':
     unittest.main()
