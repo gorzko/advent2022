@@ -11,6 +11,7 @@ import day9
 import day10
 import day11
 import day12
+import day13
 
 class TestsDay4(unittest.TestCase):
 
@@ -215,10 +216,45 @@ class TestDay11(unittest.TestCase):
 class TestDay12(unittest.TestCase):
 
     def test_day12_1(self):
-        self.assertEqual(day12.day12_1('day12t.txt'), 31)
+        self.assertEqual(day12.day12('day12t.txt', 1), 31)
 
     def test_day12_2(self):
-        self.assertEqual(day12.day12_2('day12t.txt'), 29)
+        self.assertEqual(day12.day12('day12t.txt', 2), 29)
+
+class TestDay13(unittest.TestCase):
+
+    def test_check_ints_lt(self):
+        self.assertTrue(day13.check_order(5, 10))
+
+    def test_check_ints_gt(self):
+        self.assertFalse(day13.check_order(15, 10))
+
+    def test_check_ints_lt(self):
+        self.assertIsNone(day13.check_order(10, 10))
+
+    def test_check_lists_lt(self):
+        self.assertTrue(day13.check_order([1,1], [1,2]))
+
+    def test_check_lists_gt(self):
+        self.assertFalse(day13.check_order([1,1, 3], [1,1,2]))
+
+    def test_check_lists_lt2(self):
+        self.assertTrue(day13.check_order([1], [1,2]))
+
+    def test_check_lists_gt(self):
+        self.assertFalse(day13.check_order([1,1, 3], [1,1]))
+
+    def test_check_lists_complex1(self):
+        self.assertTrue(day13.check_order([1,[1, 2, [3]], 3], [1,[1, 2, 3], 4]))
+
+    def test_check_lists_complex2(self):
+        self.assertFalse(day13.check_order([1,[1, 2, [3]], [5]], [1,[1, 2, 3], 4]))
+
+    def test_day13_1(self):
+        self.assertEqual(day13.day13_1('day13t.txt'), 13)
+
+    def test_day13_2(self):
+        self.assertEqual(day13.day13_2('day13t.txt'), 140)
 
 if __name__ == '__main__':
     unittest.main()
