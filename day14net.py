@@ -5,7 +5,7 @@ def register_rock_tiles(file):
         lines = f.readlines()
         lines = [entry.strip() for entry in lines]
 
-    grid = np.zeros((200, 1000))
+    grid = np.zeros((200, 1000), dtype=np.uint8)
     end_of_rock_field = 0
     min_x = max_x = 0
     for line in lines:
@@ -23,11 +23,11 @@ def register_rock_tiles(file):
                     if y > end_of_rock_field:
                         end_of_rock_field = y
                     grid[y, x] = 1
-    return grid, end_of_rock_field, 0
+    return grid[:end_of_rock_field+1,min_x:max_x+1], end_of_rock_field, min_x
 
 def add_sand_particle(grid, end_of_rock_field, offset):
     sand = (0,500-offset)
-    while sand[0] <= end_of_rock_field:
+    while sand[0] < end_of_rock_field:
         # down
         if grid[sand[0]+1, sand[1]] == 0:
             sand = (sand[0]+1, sand[1])
@@ -43,10 +43,11 @@ def add_sand_particle(grid, end_of_rock_field, offset):
 
 def solve1(file):
     grid, end_of_rock_field, offset = register_rock_tiles(file)
-
     sand_tiles = 0
     new_sand = add_sand_particle(grid, end_of_rock_field, offset)
     while new_sand != (-1, -1):
+        if sand_tiles == 10:
+            print(grid.nonzero())
         grid[new_sand[0], new_sand[1]] = 1
         sand_tiles +=1
         new_sand = add_sand_particle(grid, end_of_rock_field, offset)

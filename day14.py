@@ -21,14 +21,15 @@ def read_file(file):
             if offset is None or point[0] < offset:
                 offset = point[0]
 
-    grid = sparse.lil_matrix(np.zeros((max_y + 1, max_x + 1 - offset), dtype=np.uint16))
+    grid = sparse.lil_matrix(np.zeros((max_y + 1, max_x + 1 - offset), dtype=np.uint8))
 
     for path in input_data:
         for i in range(len(path) - 1):
             x = sorted([path[i][0], path[i + 1][0]])
             x0, x1 = x[0] - offset, x[1] - offset
-            y0 = path[i][1]
-            y1 = path[i + 1][1]
+            y = sorted([path[i][1], path[i + 1][1]])
+            y0 = y[0]
+            y1 = y[1]
 
             if x0 == x1:
                 column = np.arange(y0, y1 + 1)
@@ -67,6 +68,8 @@ def day14_1(file):
     grid, source = read_file(file)
     n = 0
     while True:
+        if n == 10:
+            print(grid.toarray().nonzero())
         row = grid.getcol(source).nonzero()[0]
         if len(row) != 0:
             xy = sand_fall(grid, source, row[0]-1)
