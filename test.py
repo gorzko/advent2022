@@ -260,7 +260,13 @@ class TestDay13(unittest.TestCase):
 class TestDay14(unittest.TestCase):
 
     def test_day14_1(self):
-        self.assertEqual(day14.day14_1('day14t.txt'), 24)
+        self.assertEqual(day14.day14('day14t.txt'), 24)
+
+    def test_day14_1p(self):
+        self.assertEqual(day14.day14('day14.txt'), 618)
+
+    def test_day14_2(self):
+        self.assertEqual(day14.day14('day14t.txt', 2), 93)
 
 if __name__ == '__main__':
     unittest.main()

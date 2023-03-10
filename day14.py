@@ -1,5 +1,4 @@
 import numpy as np
-from scipy import sparse
 
 def read_file(file):
     with open('input\\' + file, 'r') as f:
@@ -11,22 +10,19 @@ def read_file(file):
             line = [eval('(' + p + ')') for p in line.split(' -> ')]
             input_data.append(line)
     max_x = max_y = 0
-    offset = None
     for line in input_data:
         for point in line:
             if point[0] > max_x:
                 max_x = point[0]
             if point[1] > max_y:
                 max_y = point[1]
-            if offset is None or point[0] < offset:
-                offset = point[0]
 
-    grid = sparse.lil_matrix(np.zeros((max_y + 1, max_x + 1 - offset), dtype=np.uint8))
+    grid = np.zeros((max_y + 1, 1000), dtype=np.uint8)
 
     for path in input_data:
         for i in range(len(path) - 1):
             x = sorted([path[i][0], path[i + 1][0]])
-            x0, x1 = x[0] - offset, x[1] - offset
+            x0, x1 = x[0], x[1]
             y = sorted([path[i][1], path[i + 1][1]])
             y0 = y[0]
             y1 = y[1]
@@ -40,15 +36,26 @@ def read_file(file):
 
             grid[column, row] = 1
 
-    return grid, 500 - offset
+    return grid
 
+def stretch_grid(grid, left=False):
+    column = np.zeros((grid.shape[0], 1))
+    column[-1] = 1
+    if left:
+        return np.concatenate((column, grid), axis=1)
+    else:
+        return np.concatenate((grid, column), axis=1)
 def sand_fall(grid, x, y):
     while y < grid.shape[0] - 1:
         if grid[y+1, x] == 0:
             y += 1
+        # elif x == 0:
+        #     grid = stretch_grid(grid, True)
         elif grid[y+1, x-1] == 0:
             y += 1
             x -= 1
+        # elif x == grid.shape[1] - 1:
+        #     grid = stretch_grid(grid)
         elif grid[y+1, x+1] == 0:
             y += 1
             x += 1
@@ -56,14 +63,18 @@ def sand_fall(grid, x, y):
             return x, y
     return None
 
-def day14_1(file):
+def day14(file, part=1):
 
-    grid, source = read_file(file)
+    grid = read_file(file)
+
+    if part == 2:
+        width = grid.shape[1]
+        grid = np.concatenate((grid, np.zeros((1, width)), np.ones((1, width))))
     n = 0
-    while True:
-        row = grid.getcol(source).nonzero()[0]
+    while grid[0,500] == 0:
+        row = grid[:,500].nonzero()[0]
         if len(row) != 0:
-            xy = sand_fall(grid, source, row[0]-1)
+            xy = sand_fall(grid, 500, row[0]-1)
             if xy:
                 grid[xy[1], xy[0]] = 2
             else:
@@ -73,4 +84,4 @@ def day14_1(file):
 
 
 if __name__ == '__main__':
-    print(day14_1('day14.txt'))
+    print(day14('day14.txt', 2))
