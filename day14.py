@@ -43,33 +43,24 @@ def read_file(file):
     return grid, 500 - offset
 
 def sand_fall(grid, x, y):
-    while True:
-        if grid.shape[0] - 1 > y:
-            if grid[y+1, x] == 0:
-                y += 1
-            elif x == 0:
-                return None
-            elif grid[y+1, x-1] == 0:
-                y += 1
-                x -= 1
-            elif x == grid.shape[1] - 1:
-                return None
-            elif grid[y+1, x+1] == 0:
-                y += 1
-                x += 1
-            else:
-                break
+    while y < grid.shape[0] - 1:
+        if grid[y+1, x] == 0:
+            y += 1
+        elif grid[y+1, x-1] == 0:
+            y += 1
+            x -= 1
+        elif grid[y+1, x+1] == 0:
+            y += 1
+            x += 1
         else:
-            break
-    return x, y
+            return x, y
+    return None
 
 def day14_1(file):
 
     grid, source = read_file(file)
     n = 0
     while True:
-        if n == 10:
-            print(grid.toarray().nonzero())
         row = grid.getcol(source).nonzero()[0]
         if len(row) != 0:
             xy = sand_fall(grid, source, row[0]-1)
