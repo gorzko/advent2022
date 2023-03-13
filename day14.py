@@ -49,13 +49,9 @@ def sand_fall(grid, x, y):
     while y < grid.shape[0] - 1:
         if grid[y+1, x] == 0:
             y += 1
-        # elif x == 0:
-        #     grid = stretch_grid(grid, True)
         elif grid[y+1, x-1] == 0:
             y += 1
             x -= 1
-        # elif x == grid.shape[1] - 1:
-        #     grid = stretch_grid(grid)
         elif grid[y+1, x+1] == 0:
             y += 1
             x += 1
