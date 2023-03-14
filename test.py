@@ -274,5 +274,8 @@ class TestDay15(unittest.TestCase):
     def test_day15_1(self):
         self.assertEqual(day15.day15_1('day15t.txt', 10), 26)
 
+    def test_day15_2(self):
+        self.assertEqual(day15.day15_2('day15t.txt', 20), 56000011)
+
 if __name__ == '__main__':
     unittest.main()
