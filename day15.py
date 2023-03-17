@@ -1,3 +1,5 @@
+import timeit
+
 def read_file(file):
     with open('input\\' + file, 'r') as f:
         file = f.readlines()
@@ -24,22 +26,15 @@ def day15_1(file, y):
 
 def day15_2(file, ceil):
     sensors = read_file(file)
-    unique = set()
     for s in sensors:
         outline = set([((max(0, s[0] - deviation - 1), i), (min(ceil, s[0] + deviation + 1), i)) for i in
                        range(max(0, s[1] - s[4] - 1), min(ceil, s[1] + s[4] + 2)) if
-                       (deviation := s[4] - abs(i - s[1])) >= 0])
+                       (deviation := s[4] - abs(i - s[1])) >= -1])
         outline = [p for p in outline for p in p]
-        temp_outline = outline.copy()
-        for o in outline:
-            for ss in sensors:
-                if in_area(ss, o[0], o[1]):
-                    temp_outline.remove(o)
-                    break
-        unique.update(temp_outline)
-    unique = list(unique)[0]
-    return unique[0] * 4000000 + unique[1]
+        outline = [o for o in outline if any([in_area(ss, o[0], o[1]) for ss in sensors]) == False]
+        if outline:
+            return outline[0][0] * 4000000 + outline[0][1]
 
 
 if __name__ == '__main__':
-            print(day15_2('day15t.txt', 20))
+            print(day15_2('day15.txt', 4000000))
