@@ -26,12 +26,13 @@ def read_file(file):
 
     return valves, mapping, distances
 
-def day16_1(file):
+def day16_1(file, threshold = None):
     valves, mapping, distances = read_file(file)
     minutes = 30
-    current = valves[0]
-    threshold = np.mean([v[1] for v in valves])
-    first = [v for v in valves if v[1] > threshold]
+    current = [v for v in valves if v[0] == 'AA'][0]
+    if threshold is None:
+        threshold = int(np.mean([v[1] for v in valves if v[1] > 0]))
+    first = [v for v in valves if v[1] >= threshold]
     last = [v for v in valves if v not in first and v[1] > 0]
     batch = first.copy()
     pressure = 0
@@ -61,4 +62,6 @@ def day16_2(file):
 
 
 if __name__ == '__main__':
-    print(day16_1('day16t.txt'))
+    for i in [4,5,6,7,8,10,14,15,18,19,20,21,22,24,25]:
+        print(f"{i}: {day16_1('day16.txt', i)}")
+    print(f"{None}: {day16_1('day16.txt')}")
