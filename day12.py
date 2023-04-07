@@ -52,14 +52,14 @@ def get_adjacency_matrix(height_map):
     return adjacency_matrix
 
 def find_path(adjacency_matrix, start, end):
-    multiplicated_matrix = adjacency_matrix.copy()
+    multiplied_matrix = adjacency_matrix.copy()
     n = 1
     while True:
         if n % 50 == 0:
             print(n)
         n += 1
-        multiplicated_matrix = multiplicated_matrix @ adjacency_matrix
-        if (multiplicated_matrix[start, end] != 0).toarray().any():
+        multiplied_matrix = multiplied_matrix @ adjacency_matrix
+        if (multiplied_matrix[start, end] != 0).toarray().any():
             break
     return n
 
@@ -70,4 +70,4 @@ def day12(file, part):
 
 
 if __name__ == '__main__':
-    print(day12('day12.txt', 2))
+    print(day12('day12.txt', 1))
