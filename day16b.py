@@ -2,24 +2,27 @@ import numpy as np
 from functools import cache
 import timeit
 
-distances = None
-mapping = dict()
+Distances = np.empty_like
+Valves = dict()
+Mapping = dict()
+Iteration = 0
+
 def read_file(file):
     with open('input\\' + file, 'r') as f:
         valves = f.readlines()
     valves = [(v[1], int(v[4].split('=')[1].strip(';')), [t.strip(',') for t in v[9:]]) for v in [v.split() for v in valves]]
-    global mapping
-    mapping = {key: value for key, value in[(v[0], i) for i, v in enumerate(valves)]}
-    grid = np.zeros((len(mapping), len(mapping)), dtype=np.int8)
-    global distances
-    distances = grid.copy()
+    global Valves
+    Valves = {v[0]: v[1] for v in valves}
+    global Mapping
+    Mapping = {key: value for key, value in [(v[0], i) for i, v in enumerate(valves)]}
+    grid = np.zeros((len(Mapping), len(Mapping)), dtype=np.int8)
+    global Distances
+    Distances = grid.copy()
     for v in valves:
-        i = mapping[v[0]]
+        i = Mapping[v[0]]
         for t in v[2]:
-            j = mapping[t]
+            j = Mapping[t]
             grid[i, j] = 1
-
-    valves = tuple([(v[0], v[1]) for v in valves])
 
     n = 1
     n_grid = grid.copy()
@@ -27,34 +30,43 @@ def read_file(file):
     while n < n_grid.shape[0]:
         connections = np.where(n_grid > 0)
         for i, j in zip(connections[0], connections[1]):
-            if i != j and distances[i, j] == 0:
-                distances[i, j] = n
+            if i != j and Distances[i, j] == 0:
+                Distances[i, j] = n
         n_grid = np.matmul(n_grid, grid)
         n += 1
 
-    return valves
-
 @cache
-def solve(current, valves, minutes, distance):
+def solve(minutes, valves, current='AA'):
 
-    pressure = 0
-    batch = tuple((v for v in valves if v != current))
+    # global Iteration
+    # Iteration += 1
+    # if Iteration % 1000000 == 0:
+    #     print(Iteration)
 
-    minutes -= distance + 1
-    pressure += current[1] * minutes
+    pressure = Valves[current] * minutes
 
-    return pressure + max([solve(v, batch, minutes, distances[mapping[current[0]], mapping[v[0]]]) for v in batch], default=0)
+    return max([pressure +
+                solve(
+                    minutes - Distances[Mapping[current], Mapping[v]] - 1,
+                    valves - {current},
+                    v)
+                for v in valves if v != current],
+               default=pressure)
 
 def day16_1(file):
-    valves = read_file(file)
-    minutes = 31
-    current = [v for v in valves if v[0] == 'AA'][0]
+    read_file(file)
+    minutes = 30
 
-    return solve(current, tuple((v for v in valves if v[1])), minutes, 0)
+    # return search(30)
+    return solve(minutes, frozenset(v for v in Valves if Valves[v]))
 
 
 def day16_2(file):
     pass
+
+def search(t, u='AA', vs=frozenset(Valves), e=False):
+    return max([Valves[v] * (t - Distances[u,v] - 1) + search(t - Distances[u,v] - 1, v, vs - {v}, e)
+                for v in vs if Distances[u,v] < t] + [search(26, vs=vs) if e else 0])
 
 
 if __name__ == '__main__':
