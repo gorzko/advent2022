@@ -1,16 +1,25 @@
 import numpy as np
+from functools import cache
+
+Distances = np.empty_like
+Valves = dict()
+Mapping = dict()
 
 def read_file(file):
     with open('input\\' + file, 'r') as f:
         valves = f.readlines()
     valves = [(v[1], int(v[4].split('=')[1].strip(';')), [t.strip(',') for t in v[9:]]) for v in [v.split() for v in valves]]
-    mapping = {key: value for key, value in[(v[0], i) for i, v in enumerate(valves)]}
-    grid = np.zeros((len(mapping), len(mapping)), dtype=np.int8)
-    distances = grid.copy()
+    global Valves
+    Valves = {v[0]: v[1] for v in valves}
+    global Mapping
+    Mapping = {key: value for key, value in [(v[0], i) for i, v in enumerate(valves)]}
+    grid = np.zeros((len(Mapping), len(Mapping)), dtype=np.int8)
+    global Distances
+    Distances = grid.copy()
     for v in valves:
-        i = mapping[v[0]]
+        i = Mapping[v[0]]
         for t in v[2]:
-            j = mapping[t]
+            j = Mapping[t]
             grid[i, j] = 1
 
     n = 1
@@ -19,42 +28,30 @@ def read_file(file):
     while n < n_grid.shape[0]:
         connections = np.where(n_grid > 0)
         for i, j in zip(connections[0], connections[1]):
-            if i != j and distances[i, j] == 0:
-                distances[i, j] = n
+            if i != j and Distances[i, j] == 0:
+                Distances[i, j] = n
         n_grid = np.matmul(n_grid, grid)
         n += 1
 
-    return valves, mapping, distances
 
-def day16_1(file, threshold = None):
-    valves, mapping, distances = read_file(file)
+# Inspired by this solution: https://www.reddit.com/r/adventofcode/comments/zn6k1l/comment/j0fti6c/?context=3
+@cache
+def solve(minutes, valves, current='AA'):
+
+    return max([Valves[v] * (minutes - Distances[Mapping[current], Mapping[v]] - 1) +
+                solve(
+                    minutes - Distances[Mapping[current], Mapping[v]] - 1,
+                    valves - {current},
+                    v)
+                for v in valves if v != current and Distances[Mapping[current], Mapping[v]] < minutes],
+               default=0)
+
+
+def day16_1(file):
+    read_file(file)
     minutes = 30
-    current = [v for v in valves if v[0] == 'AA'][0]
-    if threshold is None:
-        threshold = int(np.mean([v[1] for v in valves if v[1] > 0]))
-    first = [v for v in valves if v[1] >= threshold]
-    last = [v for v in valves if v not in first and v[1] > 0]
-    batch = first.copy()
-    pressure = 0
 
-    while minutes > 0:
-        if not batch:
-            if last:
-                batch, last = last.copy(), []
-            else:
-                minutes = 0
-        for x in range(1, len(valves)):
-            i = valves.index(current)
-            jj = [x for x in np.where(distances[i,] == x)[0].tolist() if valves[x] in batch]
-            values = [valves[j][1] for j in jj]
-            if values:
-                j = jj[values.index(max(values))]
-                minutes -= distances[i,j] + 1
-                current = valves[j]
-                pressure += current[1] * minutes
-                batch.remove(current)
-                break
-    return pressure
+    return solve(minutes, frozenset(v for v in Valves if Valves[v]))
 
 
 def day16_2(file):
@@ -62,6 +59,4 @@ def day16_2(file):
 
 
 if __name__ == '__main__':
-    for i in [4,5,6,7,8,10,14,15,18,19,20,21,22,24,25]:
-        print(f"{i}: {day16_1('day16.txt', i)}")
-    print(f"{None}: {day16_1('day16.txt')}")
+    print(day16_1('day16.txt'))
