@@ -35,28 +35,30 @@ def read_file(file):
 
 
 # Inspired by this solution: https://www.reddit.com/r/adventofcode/comments/zn6k1l/comment/j0fti6c/?context=3
+# Frankly speaking I don't fully understand how part 2 works
 @cache
-def solve(minutes, valves, current='AA'):
+def solve(minutes, valves, part=1, current='AA'):
 
     return max([Valves[v] * (minutes - Distances[Mapping[current], Mapping[v]] - 1) +
                 solve(
                     minutes - Distances[Mapping[current], Mapping[v]] - 1,
                     valves - {current},
+                    part,
                     v)
-                for v in valves if v != current and Distances[Mapping[current], Mapping[v]] < minutes],
+                for v in valves if v != current and Distances[Mapping[current], Mapping[v]] < minutes] +
+               [solve(
+                   26,
+                   valves - {current})
+                if part == 2 else 0],
                default=0)
 
 
-def day16_1(file):
+def day16(file, part=1):
     read_file(file)
-    minutes = 30
+    minutes = 30 if part == 1 else 26
 
-    return solve(minutes, frozenset(v for v in Valves if Valves[v]))
-
-
-def day16_2(file):
-    pass
+    return solve(minutes, frozenset(v for v in Valves if Valves[v]), part)
 
 
 if __name__ == '__main__':
-    print(day16_1('day16.txt'))
+    print(day16('day16.txt', 2))
