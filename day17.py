@@ -60,8 +60,9 @@ def push_rock(rock):
     shift = SHIFTS[JETS[0]]
     JETS.append(JETS.popleft())
 
-
-    if not any([r & shift.edge or r & CHAMBER[i] for i, r in enumerate(rock, ROCK_POSITION)]):
+    temp = [shift.direction(r, 1) for r in rock]
+    if not any([r & shift.edge for r in rock]) and \
+            not any([r & CHAMBER[i] for i, r in enumerate(temp, ROCK_POSITION)]):
         rock = [shift.direction(r, 1) for r in rock]
 
     return rock
@@ -95,4 +96,4 @@ def day17_2(file):
 
 
 if __name__ == '__main__':
-    print(day17('day17t.txt', 2022))
+    print(day17('day17.txt', 1000000000000))
