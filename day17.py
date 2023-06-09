@@ -132,4 +132,4 @@ def day17_2(file):
 
 
 if __name__ == '__main__':
-    print(day17('day17.txt', 2022))
+    print(day17('day17t.txt', 1000000000000))
