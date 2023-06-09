@@ -2,8 +2,9 @@ from operator import lshift, rshift
 from collections import deque, namedtuple
 import numpy as np
 from operator import lshift, rshift
+import math
 
-CHAMBER = np.zeros(10000, dtype=np.uint8)
+CHAMBER = np.zeros(1000000, dtype=np.uint8)
 
 ROCKS = [
     (
@@ -34,8 +35,11 @@ ROCKS = [
 ROCK_POSITION = 0
 ROCKS_COUNTER = 0
 JETS = deque()
+CACHE = {}
+
 Shift = namedtuple('Shift', ['direction', 'edge'])
 SHIFTS = {'<': Shift(lshift, 64), '>': Shift(rshift, 1)}
+COLUMNS = [pow(2, i) for i in range(7)]
 
 
 def read_file(file):
@@ -53,7 +57,29 @@ def get_rock():
     peak = max(CHAMBER.nonzero()[0], default=-1)
     ROCK_POSITION = peak + 4
 
+    if ROCKS_COUNTER % 100000 == 0:
+        print(ROCKS_COUNTER)
+
     return rock
+
+def cache_chamber(rock):
+    current = tuple(max(p) if len(p := np.where(CHAMBER & int(math.pow(2, i)))[0]) > 0 else -1 for i in range(7))
+    if all(np.array(current) > -1):
+        peak = x = max(current)
+        current = tuple(x - i for i in current)
+        key = current + rock + tuple(JETS)
+        if key in CACHE:
+            cycle = ROCKS_COUNTER - CACHE[key][0]
+            increment = peak - CACHE[key][1]
+            rocks_left = 2023 - CACHE[key][0]
+            cycles = int(rocks_left / cycle)
+            last = [i for i in CACHE.keys()].index(key) + rocks_left - cycle * cycles
+            last = [i for i in CACHE.keys()][last]
+            cycles = cycles * increment
+            total = cycles + CACHE[last][1]
+            print(total)
+        else:
+            CACHE[key] = ROCKS_COUNTER, peak
 
 def push_rock(rock):
     global JETS
@@ -63,7 +89,7 @@ def push_rock(rock):
     temp = [shift.direction(r, 1) for r in rock]
     if not any([r & shift.edge for r in rock]) and \
             not any([r & CHAMBER[i] for i, r in enumerate(temp, ROCK_POSITION)]):
-        rock = [shift.direction(r, 1) for r in rock]
+        rock = temp
 
     return rock
 
@@ -76,6 +102,7 @@ def fall(rock):
     else:
         CHAMBER[np.arange(ROCK_POSITION, ROCK_POSITION + len(rock))] = tuple([r ^ CHAMBER[i] for i, r in enumerate(rock, ROCK_POSITION)])
         rock = get_rock()
+        cache_chamber(rock)
 
     return rock
 
@@ -96,4 +123,4 @@ def day17_2(file):
 
 
 if __name__ == '__main__':
-    print(day17('day17.txt', 1000000000000))
+    print(day17('day17t.txt', 2022))
