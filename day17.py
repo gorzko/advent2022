@@ -62,7 +62,7 @@ def get_rock():
 
     return rock
 
-def cache_chamber(rock):
+def cache_chamber(rock, rocks_limit):
     current = tuple(max(p) if len(p := np.where(CHAMBER & int(math.pow(2, i)))[0]) > 0 else -1 for i in range(7))
     if all(np.array(current) > -1):
         peak = x = max(current)
@@ -71,7 +71,7 @@ def cache_chamber(rock):
         if key in CACHE:
             cycle = ROCKS_COUNTER - CACHE[key][0]
             increment = peak - CACHE[key][1]
-            rocks_left = 2023 - CACHE[key][0]
+            rocks_left = rocks_limit - CACHE[key][0] + 1
             cycles = int(rocks_left / cycle)
             last = [i for i in CACHE.keys()].index(key) + rocks_left - cycle * cycles
             last = [i for i in CACHE.keys()][last]
@@ -115,15 +115,15 @@ def day17(file, rocks_limit):
         rock = push_rock(rock)
         temp = fall(rock)
         if temp != rock:
-            total = cache_chamber(temp)
+            total = cache_chamber(temp, rocks_limit)
             if total:
                 break
         rock = temp
 
-    return total + 1
+    return (total if total else max(CHAMBER.nonzero()[0])) + 1
 def day17_2(file):
     pass
 
 
 if __name__ == '__main__':
-    print(day17('day17t.txt', 2022))
+    print(day17('day17.txt', 2022))
