@@ -76,11 +76,10 @@ def cache_chamber(rock):
             last = [i for i in CACHE.keys()].index(key) + rocks_left - cycle * cycles
             last = [i for i in CACHE.keys()][last]
             cycles = cycles * increment
-            total = cycles + CACHE[last][1]
-            print(total)
+            return cycles + CACHE[last][1]
         else:
             CACHE[key] = ROCKS_COUNTER, peak
-
+    return None
 def push_rock(rock):
     global JETS
     shift = SHIFTS[JETS[0]]
@@ -102,7 +101,6 @@ def fall(rock):
     else:
         CHAMBER[np.arange(ROCK_POSITION, ROCK_POSITION + len(rock))] = tuple([r ^ CHAMBER[i] for i, r in enumerate(rock, ROCK_POSITION)])
         rock = get_rock()
-        cache_chamber(rock)
 
     return rock
 
@@ -115,9 +113,14 @@ def day17(file, rocks_limit):
         if not rock:
             rock = get_rock()
         rock = push_rock(rock)
-        rock = fall(rock)
+        temp = fall(rock)
+        if temp != rock:
+            total = cache_chamber(temp)
+            if total:
+                break
+        rock = temp
 
-    return max(CHAMBER.nonzero()[0]) + 1
+    return total + 1
 def day17_2(file):
     pass
 
