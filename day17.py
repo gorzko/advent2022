@@ -3,6 +3,7 @@ from collections import deque, namedtuple
 import numpy as np
 from operator import lshift, rshift
 import math
+from itertools import cycle
 
 CHAMBER = np.zeros(1000000, dtype=np.uint8)
 
@@ -34,7 +35,9 @@ ROCKS = [
 
 ROCK_POSITION = 0
 ROCKS_COUNTER = 0
-JETS = deque()
+JETS = None
+JETS_COUNTER = None
+JET_CURRENT = 0
 CACHE = {}
 
 Shift = namedtuple('Shift', ['direction', 'edge'])
@@ -43,9 +46,11 @@ COLUMNS = [pow(2, i) for i in range(7)]
 
 
 def read_file(file):
-    global JETS, ROCKS
+    global JETS, JETS_COUNTER, ROCKS
     with open('input\\' + file, 'r') as f:
-        JETS = deque([j for j in f.read()])
+        jets = [j for j in f.read()]
+        JETS = cycle(jets)
+        JETS_COUNTER = cycle(range(len(jets)))
     ROCKS = deque([r[::-1] for r in ROCKS])
 
 def get_rock():
@@ -63,11 +68,12 @@ def get_rock():
     return rock
 
 def cache_chamber(rock, rocks_limit):
+    global JET_CURRENT
     current = tuple(max(p) if len(p := np.where(CHAMBER & int(math.pow(2, i)))[0]) > 0 else -1 for i in range(7))
     if all(np.array(current) > -1):
         peak = x = max(current)
         current = tuple(x - i for i in current)
-        key = current + rock + tuple(JETS)
+        key = current + rock + tuple([JET_CURRENT])
         if key in CACHE:
             cycle = ROCKS_COUNTER - CACHE[key][0]
             increment = peak - CACHE[key][1]
@@ -81,9 +87,9 @@ def cache_chamber(rock, rocks_limit):
             CACHE[key] = ROCKS_COUNTER, peak
     return None
 def push_rock(rock):
-    global JETS
-    shift = SHIFTS[JETS[0]]
-    JETS.append(JETS.popleft())
+    global JETS, JETS_COUNTER, JET_CURRENT
+    shift = SHIFTS[JETS.__next__()]
+    JET_CURRENT = JETS_COUNTER.__next__()
 
     temp = [shift.direction(r, 1) for r in rock]
     if not any([r & shift.edge for r in rock]) and \
