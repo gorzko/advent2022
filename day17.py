@@ -5,83 +5,70 @@ from operator import lshift, rshift
 import math
 from itertools import cycle
 
-ROCK_POSITION = 0
-ROCKS_COUNTER = 0
-JETS = None
-JETS_COUNTER = None
-JET_CURRENT = 0
-CACHE = {}
-
-Shift = namedtuple('Shift', ['direction', 'edge'])
-SHIFTS = {'<': Shift(lshift, 64), '>': Shift(rshift, 1)}
-COLUMNS = [pow(2, i) for i in range(7)]
-
 
 def read_file(file):
-    global JETS, JETS_COUNTER
     with open('input\\' + file, 'r') as f:
         jets = [j for j in f.read()]
-        JETS = cycle(jets)
-        JETS_COUNTER = cycle(range(len(jets)))
+        jets_counter = cycle(range(len(jets)))
+        jets = cycle(jets)
+    return jets, jets_counter
 
-def get_rock(rocks, chamber):
-    global ROCKS_COUNTER, ROCK_POSITION
+
+def get_rock(rocks, chamber, rocks_counter):
     rock = rocks.__next__()
-    ROCKS_COUNTER += 1
+    rocks_counter += 1
 
     peak = max(chamber.nonzero()[0], default=-1)
-    ROCK_POSITION = peak + 4
+    rock_position = peak + 4
 
-    if ROCKS_COUNTER % 100000 == 0:
-        print(ROCKS_COUNTER)
+    return rock, rock_position, rocks_counter
 
-    return rock
 
-def cache_chamber(rock, rocks_limit, chamber):
-    global JET_CURRENT
+def push_rock(rock, chamber, rock_position, jets, jets_counter, shifts):
+    shift = shifts[jets.__next__()]
+    jet_current = jets_counter.__next__()
+
+    temp = [shift.direction(r, 1) for r in rock]
+    if not any([r & shift.edge for r in rock]) and \
+            not any([r & chamber[i] for i, r in enumerate(temp, rock_position)]):
+        rock = temp
+
+    return rock, jet_current
+
+
+def fall(rock, rocks, chamber, rock_position, rocks_counter):
+
+    if rock_position != 0 and not any([r & chamber[i] for i, r in enumerate(rock, rock_position-1)]):
+        rock_position -= 1
+
+    else:
+        chamber[np.arange(rock_position, rock_position + len(rock))] = tuple([r ^ chamber[i] for i, r in enumerate(rock, rock_position)])
+        rock, rock_position, rocks_counter = get_rock(rocks, chamber, rocks_counter)
+
+    return rock, rock_position, rocks_counter
+
+
+def cache_chamber(cache, rock, rocks_limit, chamber, rocks_counter, jets_current):
     current = tuple(max(p) if len(p := np.where(chamber & int(math.pow(2, i)))[0]) > 0 else -1 for i in range(7))
     if all(np.array(current) > -1):
         peak = x = max(current)
         current = tuple(x - i for i in current)
-        key = current + rock + tuple([JET_CURRENT])
-        if key in CACHE:
-            cycle_size = ROCKS_COUNTER - CACHE[key][0]
-            increment = peak - CACHE[key][1]
-            rocks_left = rocks_limit - CACHE[key][0] + 1
+        key = current + rock + tuple([jets_current])
+        if key in cache:
+            cycle_size = rocks_counter - cache[key][0]
+            increment = peak - cache[key][1]
+            rocks_left = rocks_limit - cache[key][0] + 1
             cycles = int(rocks_left / cycle_size)
-            last = [i for i in CACHE.keys()].index(key) + rocks_left - cycle_size * cycles
-            last = [i for i in CACHE.keys()][last]
+            last = [i for i in cache.keys()].index(key) + rocks_left - cycle_size * cycles
+            last = [i for i in cache.keys()][last]
             cycles = cycles * increment
-            return cycles + CACHE[last][1]
+            return cycles + cache[last][1]
         else:
-            CACHE[key] = ROCKS_COUNTER, peak
+            cache[key] = rocks_counter, peak
     return None
-def push_rock(rock, chamber):
-    global JETS, JETS_COUNTER, JET_CURRENT
-    shift = SHIFTS[JETS.__next__()]
-    JET_CURRENT = JETS_COUNTER.__next__()
 
-    temp = [shift.direction(r, 1) for r in rock]
-    if not any([r & shift.edge for r in rock]) and \
-            not any([r & chamber[i] for i, r in enumerate(temp, ROCK_POSITION)]):
-        rock = temp
-
-    return rock
-
-def fall(rock, rocks, chamber):
-    global ROCK_POSITION
-
-    if ROCK_POSITION != 0 and not any([r & chamber[i] for i, r in enumerate(rock, ROCK_POSITION-1)]):
-        ROCK_POSITION -= 1
-
-    else:
-        chamber[np.arange(ROCK_POSITION, ROCK_POSITION + len(rock))] = tuple([r ^ chamber[i] for i, r in enumerate(rock, ROCK_POSITION)])
-        rock = get_rock(rocks, chamber)
-
-    return rock
 
 def day17(file, rocks_limit):
-    global ROCKS_COUNTER
     chamber = np.zeros(1000000, dtype=np.uint8)
     rocks = [
         (
@@ -109,17 +96,21 @@ def day17(file, rocks_limit):
         ),
     ]
     rocks = cycle([r[::-1] for r in rocks])
+    rocks_counter = 0
+    Shift = namedtuple('Shift', ['direction', 'edge'])
+    shifts = {'<': Shift(lshift, 64), '>': Shift(rshift, 1)}
+    cache = {}
 
-    read_file(file)
+    jets, jets_counter = read_file(file)
     rock = None
 
-    while ROCKS_COUNTER <= rocks_limit:
+    while rocks_counter <= rocks_limit:
         if not rock:
-            rock = get_rock(rocks, chamber)
-        rock = push_rock(rock, chamber)
-        temp = fall(rock, rocks, chamber)
+            rock, rock_position, rocks_counter = get_rock(rocks, chamber, rocks_counter)
+        rock, jet_current = push_rock(rock, chamber, rock_position, jets, jets_counter, shifts)
+        temp, rock_position, rocks_counter = fall(rock, rocks, chamber, rock_position, rocks_counter)
         if temp != rock:
-            total = cache_chamber(temp, rocks_limit, chamber)
+            total = cache_chamber(cache, temp, rocks_limit, chamber, rocks_counter, jet_current)
             if total:
                 break
         rock = temp
