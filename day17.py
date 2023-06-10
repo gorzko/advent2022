@@ -69,7 +69,7 @@ def cache_chamber(cache, rock, rocks_limit, chamber, rocks_counter, jets_current
 
 
 def day17(file, rocks_limit):
-    chamber = np.zeros(1000000, dtype=np.uint8)
+    chamber = np.zeros(10000, dtype=np.uint8)
     rocks = [
         (
             0b0011110,
@@ -119,4 +119,4 @@ def day17(file, rocks_limit):
 
 
 if __name__ == '__main__':
-    print(day17('day17t.txt', 1000000000000))
+    print(day17('day17.txt', 1000000000000))
