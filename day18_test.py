@@ -20,20 +20,15 @@ def count_adjacent(p, cubes):
     return len([i for c in cubes if (i := is_adjacent(tuple(sorted([p, c]))))])
 
 
-def day18(file, part2=False):
+def day18_1(file):
     cubes = read_file(file)
 
-    deduct = 0
-    if part2:
-        for i in range(3):
-            for j in range(3):
-                for k in range(6):
-                    if not (i, j, k) in cubes and count_adjacent((i, j, k), cubes) == 6:
-                        print(i, j, k)
-                        deduct += 6
+    return len(cubes) * 6 - sum([count_adjacent(c, cubes) for c in cubes])
 
-    return len(cubes) * 6 - sum([count_adjacent(c, cubes) for c in cubes]) - deduct
+
+def day18_2(file):
+    pass
 
 
 if __name__ == '__main__':
-    print(day18('day18.txt', True))
+    print(day18_2('day18.txt'))
