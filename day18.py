@@ -1,6 +1,5 @@
 from functools import cache
 import operator
-from collections import deque
 
 def read_file(file):
     with open('input\\' + file, 'r') as f:
@@ -20,7 +19,7 @@ and len([i for i in map(is_offset_one, p[0], p[1]) if i]) == 1
 
 def get_neighbours(p, exclusions, boundaries):
 
-    directions = [(-1, lambda x, y: x > 1), (1, lambda x, y: x < y)]
+    directions = [(-1, lambda x, y: x > -1), (1, lambda x, y: x < y)]
 
     neighbours = set()
     p = list(p)
@@ -44,11 +43,21 @@ def count_adjacent(p, cubes):
 def day18(file, part2=False):
     cubes = read_file(file)
 
-    deduct = 0
-    if part2:
-        boundaries = (3, 3, 6)
+    if not part2:
+        return sum([6 - count_adjacent(c, cubes) for c in cubes])
 
-        queue = {(1, 1, 1)}
+    # Own solution with modifications inspired by https://www.reddit.com/r/adventofcode/comments/zoqhvy/comment/j0oul0u
+
+    if part2:
+
+        boundaries = [0, 0, 0]
+
+        for i in range(3):
+            boundaries[i] = max([x[i] for x in cubes]) + 1
+
+        boundaries = tuple(boundaries)
+
+        queue = {(0, 0, 0)}
         outside = queue.copy()
 
         while queue:
@@ -57,18 +66,8 @@ def day18(file, part2=False):
             outside.update(neighbours)
             queue.update(neighbours)
 
-        grid = set()
-
-        for i in range(boundaries[0]):
-            for j in range(boundaries[1]):
-                for k in range(boundaries[2]):
-                    grid.add((i + 1, j + 1, k + 1))
-
-        for p in (p for p in grid if not p in cubes and not p in outside):
-            deduct += count_adjacent(p, cubes)
-
-    return len(cubes) * 6 - sum([count_adjacent(c, cubes) for c in cubes]) - deduct
+        return sum([count_adjacent(c, cubes) for c in outside])
 
 
 if __name__ == '__main__':
-    print(day18('day18t.txt', True))
+    print(day18('day18.txt', True))
