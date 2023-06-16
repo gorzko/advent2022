@@ -66,7 +66,7 @@ def day18(file, part2=False):
             outside.update(neighbours)
             queue.update(neighbours)
 
-        return sum([count_adjacent(c, cubes) for c in outside])
+        return sum([(n in outside) for c in cubes for n in get_neighbours(c, cubes, boundaries)])
 
 
 if __name__ == '__main__':
