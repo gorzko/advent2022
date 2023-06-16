@@ -12,9 +12,9 @@ def is_offset_one(a, b):
 
 
 @cache
-def is_adjacent(p):
-    return len([i for i in map(operator.eq, p[0], p[1]) if i]) == 2 \
-and len([i for i in map(is_offset_one, p[0], p[1]) if i]) == 1
+def is_adjacent(p1, p2):
+    return len([i for i in map(operator.eq, p1, p2) if i]) == 2 \
+and len([i for i in map(is_offset_one, p1, p2) if i]) == 1
 
 
 def get_neighbours(p, exclusions, boundaries):
@@ -37,7 +37,7 @@ def get_neighbours(p, exclusions, boundaries):
 
 
 def count_adjacent(p, cubes):
-    return len([i for c in cubes if (i := is_adjacent(tuple(sorted([p, c]))))])
+    return len([i for c in cubes if (i := is_adjacent(*sorted([p, c])))])
 
 
 def day18(file, part2=False):
