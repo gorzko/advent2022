@@ -16,33 +16,50 @@ def read_file(file):
 # 2 - obsidian
 # 3 - geode
 
-def get_robots(blueprint: Resources, robots: Resources, resources: Resources):
+def get_moves(blueprint: Resources, robots: Resources, resources: Resources):
 
-    r = []
+    moves = [None]
 
     # If I can afford geode, always buy it
     if resources.ore >= blueprint.geode.ore and resources.obsidian >= blueprint.geode.obsidian:
         return [3]
 
     # For other resources check if I can afford and if it makes any sense to buy it
-    if resources.ore >= blueprint.ore and \
-            robots.ore < max(blueprint.ore, blueprint.clay, blueprint.obsidian.ore, blueprint.geode.ore):
-        r.append(0)
+    if resources.ore >= blueprint.ore.ore and \
+            robots.ore < max(blueprint.ore.ore, blueprint.clay.ore, blueprint.obsidian.ore, blueprint.geode.ore):
+        moves.append(0)
 
-    if resources.ore >= blueprint.clay and robots.clay < blueprint.obsidian.clay:
-        r.append(1)
+    if resources.ore >= blueprint.clay.ore and robots.clay < blueprint.obsidian.clay:
+        moves.append(1)
 
     if resources.ore >= blueprint.obsidian.ore and resources.clay >= blueprint.obsidian.clay and \
         robots.obsidian < blueprint.geode.obsidian:
-        r.append(2)
+        moves.append(2)
 
-    return r
+    return moves
 
+
+def solve(time, blueprint: Resources, robots: Resources, resources: Resources):
+
+    if time:
+
+        resources = Resources._make(resources[i] + robots[i] for i in range(4))
+
+        return max([robots.geode +
+                    solve(time-1, blueprint, robots, resources)
+                    for m in get_moves(blueprint, robots, resources)], default=0)
+
+    else:
+
+        return 0
 
 def day19_1(file):
 
-    robots = [0, 0, 0, 0]
-    pass
+    blueprints = read_file(file)
+    robots = Resources(1)
+    resources = Resources()
+
+    return solve(24, blueprints[1], robots, resources)
 
 
 def day19_2(file):
@@ -50,4 +67,4 @@ def day19_2(file):
 
 
 if __name__ == '__main__':
-    print(read_file('day19t.txt'))
+    print(day19_1('day19t.txt'))
