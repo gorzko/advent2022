@@ -1,4 +1,5 @@
 from collections import namedtuple
+from functools import cache
 
 Resources = namedtuple('Resources', ['ore', 'clay', 'obsidian', 'geode'], defaults=(0, 0, 0, 0))
 
@@ -17,6 +18,7 @@ def read_file(file):
 # 2 - obsidian
 # 3 - geode
 
+@cache
 def get_moves(blueprint: Resources, robots: Resources, resources: Resources):
     moves = [None]
 
@@ -39,16 +41,17 @@ def get_moves(blueprint: Resources, robots: Resources, resources: Resources):
     return moves
 
 
+@cache
 def solve(time, blueprint: Resources, robots: Resources, resources: Resources):
     return max([robots.geode +
                 solve(
                     time - 1,
                     blueprint,
                     Resources._make(
-                        resources[i] + 1 if i == move else resources[i] for i in range(4)
+                        robots[i] + (1 if i == move else 0) for i in range(4)
                     ),
                     Resources._make(
-                        resources[i] + robots[i] for i in range(4)
+                        resources[i] + robots[i] - (blueprint[move][i] if move else 0) for i in range(4)
                     )
                 )
                 for move in get_moves(blueprint, robots, resources)], default=0) \
@@ -60,7 +63,7 @@ def day19_1(file):
     robots = Resources(1)
     resources = Resources()
 
-    return solve(24, blueprints[1], robots, resources)
+    return solve(23, blueprints[1], robots, resources)
 
 
 def day19_2(file):
