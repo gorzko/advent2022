@@ -1,10 +1,11 @@
 from collections import namedtuple
 
 Resources = namedtuple('Resources', ['ore', 'clay', 'obsidian', 'geode'], defaults=(0, 0, 0, 0))
-def read_file(file):
 
+
+def read_file(file):
     to_numbers = lambda x: list(map(int, [a.strip(':') for a in x]))
-    blueprints = {i[0]: Resources(Resources(i[1]),  Resources(i[2]), Resources(i[3], i[4]),
+    blueprints = {i[0]: Resources(Resources(i[1]), Resources(i[2]), Resources(i[3], i[4]),
                                   Resources(i[5], obsidian=i[6])) for i in \
                   [to_numbers((w[1], w[6], w[12], w[18], w[21], w[27], w[30])) for w in \
                    [l.split() for l in open('input\\' + file, 'r')]]}
@@ -17,7 +18,6 @@ def read_file(file):
 # 3 - geode
 
 def get_moves(blueprint: Resources, robots: Resources, resources: Resources):
-
     moves = [None]
 
     # If I can afford geode, always buy it
@@ -33,35 +33,29 @@ def get_moves(blueprint: Resources, robots: Resources, resources: Resources):
         moves.append(1)
 
     if resources.ore >= blueprint.obsidian.ore and resources.clay >= blueprint.obsidian.clay and \
-        robots.obsidian < blueprint.geode.obsidian:
+            robots.obsidian < blueprint.geode.obsidian:
         moves.append(2)
 
     return moves
 
 
 def solve(time, blueprint: Resources, robots: Resources, resources: Resources):
-
-    if time:
-
-        resources = Resources._make(resources[i] + robots[i] for i in range(4))
-
-        return max([robots.geode +
-                    solve(
-                        time-1,
-                        blueprint,
-                        Resources._make(
-                            resources[i] + 1 if i == move else resources[i] for i in range(4)
-                        ),
-                        resources
+    return max([robots.geode +
+                solve(
+                    time - 1,
+                    blueprint,
+                    Resources._make(
+                        resources[i] + 1 if i == move else resources[i] for i in range(4)
+                    ),
+                    Resources._make(
+                        resources[i] + robots[i] for i in range(4)
                     )
-                    for move in get_moves(blueprint, robots, resources)], default=0)
+                )
+                for move in get_moves(blueprint, robots, resources)], default=0) \
+        if time else 0
 
-    else:
-
-        return 0
 
 def day19_1(file):
-
     blueprints = read_file(file)
     robots = Resources(1)
     resources = Resources()
