@@ -46,8 +46,15 @@ def solve(time, blueprint: Resources, robots: Resources, resources: Resources):
         resources = Resources._make(resources[i] + robots[i] for i in range(4))
 
         return max([robots.geode +
-                    solve(time-1, blueprint, robots, resources)
-                    for m in get_moves(blueprint, robots, resources)], default=0)
+                    solve(
+                        time-1,
+                        blueprint,
+                        Resources._make(
+                            resources[i] + 1 if i == move else resources[i] for i in range(4)
+                        ),
+                        resources
+                    )
+                    for move in get_moves(blueprint, robots, resources)], default=0)
 
     else:
 
