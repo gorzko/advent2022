@@ -20,7 +20,7 @@ def read_file(file):
 
 @cache
 def get_moves(blueprint: Resources, robots: Resources, resources: Resources):
-    moves = [None]
+    moves = []
 
     # If I can afford geode, always buy it
     if resources.ore >= blueprint.geode.ore and resources.obsidian >= blueprint.geode.obsidian:
@@ -37,6 +37,12 @@ def get_moves(blueprint: Resources, robots: Resources, resources: Resources):
     if resources.ore >= blueprint.obsidian.ore and resources.clay >= blueprint.obsidian.clay and \
             robots.obsidian < blueprint.geode.obsidian:
         moves.append(2)
+
+    # Wait one turn if there are no moves or you can buy a robot if you wait
+    if not moves or (ore := resources.ore + robots.ore) >= min(blueprint.ore.ore, blueprint.clay.ore) or \
+        ore >= blueprint.obsidian.ore and resources.clay + robots.clay >= blueprint.obsidian.clay or \
+        ore >= blueprint.geode.ore and resources.obsidian + robots.obsidian >= blueprint.geode.obsidian:
+        moves.append(None)
 
     return moves
 
