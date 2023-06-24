@@ -69,7 +69,7 @@ def day19_1(file):
     robots = Resources(1)
     resources = Resources()
 
-    return solve(23, blueprints[1], robots, resources)
+    return solve(24, blueprints[1], robots, resources)
 
 
 def day19_2(file):
