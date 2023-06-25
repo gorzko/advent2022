@@ -18,6 +18,7 @@ import day15
 import day16
 import day17
 import day18
+import day19
 
 class TestsDay4(unittest.TestCase):
 
@@ -310,6 +311,11 @@ class TestDay18(unittest.TestCase):
 
     def test_day18_2(self):
         self.assertEqual(day18.day18('day18t.txt', True), 58)
+
+class TestDay19(unittest.TestCase):
+
+    def test_day19_1(self):
+        self.assertEqual(day19.day19_1('day19t.txt'), 33)
 
 if __name__ == '__main__':
     unittest.main()

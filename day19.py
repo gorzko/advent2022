@@ -1,5 +1,7 @@
 from collections import namedtuple
 from functools import cache
+import multiprocessing as mp
+from time import perf_counter
 
 Resources = namedtuple('Resources', ['ore', 'clay', 'obsidian', 'geode'], defaults=(0, 0, 0, 0))
 
@@ -63,7 +65,7 @@ def solve(time, blueprint: Resources, robots: Resources, resources: Resources):
                 for move in (get_moves(blueprint, robots, resources) if time else [])], default=0)
 
 
-def determine_quality(time, blueprint, id) -> int:
+def determine_quality(id, blueprint, time) -> int:
 
     robots = Resources(1)
     resources = Resources()
@@ -75,7 +77,8 @@ def day19_1(file):
 
     blueprints = read_file(file)
 
-    return sum(map())
+    with mp.Pool(mp.cpu_count() - 1) as p:
+        return sum(p.starmap(determine_quality, ((i, blueprints[i], 24) for i in blueprints)))
 
 
 def day19_2(file):
@@ -83,4 +86,6 @@ def day19_2(file):
 
 
 if __name__ == '__main__':
-    print(day19_1('day19t.txt'))
+    start = perf_counter()
+    print(day19_1('day19.txt'))
+    print(perf_counter() - start)
