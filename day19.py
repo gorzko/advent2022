@@ -57,19 +57,25 @@ def solve(time, blueprint: Resources, robots: Resources, resources: Resources):
                         robots[i] + (1 if i == move else 0) for i in range(4)
                     ),
                     Resources._make(
-                        resources[i] + robots[i] - (blueprint[move][i] if move else 0) for i in range(4)
+                        resources[i] + robots[i] - (blueprint[move][i] if move is not None else 0) for i in range(4)
                     )
                 )
-                for move in get_moves(blueprint, robots, resources)], default=0) \
-        if time else 0
+                for move in (get_moves(blueprint, robots, resources) if time else [])], default=0)
 
 
-def day19_1(file):
-    blueprints = read_file(file)
+def determine_quality(time, blueprint, id) -> int:
+
     robots = Resources(1)
     resources = Resources()
 
-    return solve(24, blueprints[1], robots, resources)
+    return solve(time, blueprint, robots, resources) * id
+
+
+def day19_1(file):
+
+    blueprints = read_file(file)
+
+    return sum(map())
 
 
 def day19_2(file):
