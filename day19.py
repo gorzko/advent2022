@@ -2,9 +2,12 @@ from collections import namedtuple
 from functools import cache
 import multiprocessing as mp
 from time import perf_counter
+import cProfile
+import pstats
 
 Resources = namedtuple('Resources', ['ore', 'clay', 'obsidian', 'geode'], defaults=(0, 0, 0, 0))
 
+GET_MOVES = 0
 
 def read_file(file):
     to_numbers = lambda x: list(map(int, [a.strip(':') for a in x]))
@@ -20,8 +23,10 @@ def read_file(file):
 # 2 - obsidian
 # 3 - geode
 
-@cache
+
 def get_moves(blueprint: Resources, robots: Resources, resources: Resources):
+
+    start = perf_counter()
     moves = []
 
     # If I can afford geode, always buy it
@@ -51,7 +56,8 @@ def get_moves(blueprint: Resources, robots: Resources, resources: Resources):
 
 @cache
 def solve(time, blueprint: Resources, robots: Resources, resources: Resources):
-    return max([robots.geode +
+
+    return max((robots.geode +
                 solve(
                     time - 1,
                     blueprint,
@@ -62,15 +68,24 @@ def solve(time, blueprint: Resources, robots: Resources, resources: Resources):
                         resources[i] + robots[i] - (blueprint[move][i] if move is not None else 0) for i in range(4)
                     )
                 )
-                for move in (get_moves(blueprint, robots, resources) if time else [])], default=0)
+                for move in (get_moves(blueprint, robots, resources) if time else [])), default=0)
 
 
 def determine_quality(id, blueprint, time) -> int:
 
+    profiler = cProfile.Profile()
+    profiler.enable()
+
     robots = Resources(1)
     resources = Resources()
 
-    return solve(time, blueprint, robots, resources) * id
+    r = solve(time, blueprint, robots, resources) * id
+
+    profiler.disable()
+    ps = pstats.Stats(profiler).sort_stats('tottime')
+    ps.print_stats()
+
+    return r
 
 
 def day19_1(file):
@@ -82,10 +97,12 @@ def day19_1(file):
 
 
 def day19_2(file):
-    pass
+
+    blueprints = read_file(file)
+
+    with mp.Pool(mp.cpu_count() - 1) as p:
+        return p.starmap(determine_quality, ((1, blueprints[i], 32) for i in range(1, 4) if i in blueprints))
 
 
 if __name__ == '__main__':
-    start = perf_counter()
-    print(day19_1('day19.txt'))
-    print(perf_counter() - start)
+    print(day19_1('day19t.txt'))
