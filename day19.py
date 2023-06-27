@@ -7,7 +7,6 @@ import pstats
 
 Resources = namedtuple('Resources', ['ore', 'clay', 'obsidian', 'geode'], defaults=(0, 0, 0, 0))
 
-GET_MOVES = 0
 
 def read_file(file):
     to_numbers = lambda x: list(map(int, [a.strip(':') for a in x]))
@@ -46,8 +45,9 @@ def get_moves(blueprint: Resources, robots: Resources, resources: Resources):
         moves.append(2)
 
     # Wait one turn if there are no moves or you can buy a robot if you wait
-    if not moves or (ore := resources.ore + robots.ore) >= min(blueprint.ore.ore, blueprint.clay.ore) or \
-        ore >= blueprint.obsidian.ore and resources.clay + robots.clay >= blueprint.obsidian.clay or \
+    if not moves or (ore := resources.ore + robots.ore) >= blueprint.ore.ore and 0 not in moves or \
+        1 not in moves and ore >= blueprint.clay.ore or \
+        ore >= blueprint.obsidian.ore and resources.clay + 3 * robots.clay >= blueprint.obsidian.clay or \
         ore >= blueprint.geode.ore and resources.obsidian + robots.obsidian >= blueprint.geode.obsidian:
         moves.append(None)
 
@@ -70,6 +70,44 @@ def solve(time, blueprint: Resources, robots: Resources, resources: Resources):
                 )
                 for move in (get_moves(blueprint, robots, resources) if time else [])), default=0)
 
+def solve2(time, blueprint: Resources) -> int:
+
+    stack = []
+
+    max_geodes = 0
+
+    robots = Resources(1)
+    resources = Resources()
+
+    stack.append((time, robots, resources))
+
+    while stack:
+
+        time, robots, resources = stack.pop()
+
+        if (time, robots, resources) in stack:
+
+            print('wtf')
+
+        if time > 0:
+
+            stack += (
+                (
+                    time - 1,
+                    Resources._make(
+                        robots[i] + (1 if i == move else 0) for i in range(4)
+                    ),
+                    Resources._make(
+                        resources[i] + robots[i] - (blueprint[move][i] if move is not None else 0) for i in range(4)
+                    )
+                 )
+            for move in get_moves(blueprint, robots, resources))
+
+        elif resources.geode > max_geodes:
+
+            max_geodes = resources.geode
+
+    return max_geodes
 
 def determine_quality(id, blueprint, time) -> int:
 
@@ -92,6 +130,10 @@ def day19_1(file):
 
     blueprints = read_file(file)
 
+    # return solve2(24, blueprints[1])
+
+    # return solve(24, blueprints[1], Resources(1), Resources())
+
     with mp.Pool(mp.cpu_count() - 1) as p:
         return sum(p.starmap(determine_quality, ((i, blueprints[i], 24) for i in blueprints)))
 
@@ -105,4 +147,4 @@ def day19_2(file):
 
 
 if __name__ == '__main__':
-    print(day19_1('day19t.txt'))
+    print(day19_1('day19.txt'))
