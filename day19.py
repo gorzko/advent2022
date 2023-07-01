@@ -1,7 +1,6 @@
 from collections import namedtuple
 from functools import cache
 import multiprocessing as mp
-from time import perf_counter
 import cProfile
 import pstats
 
@@ -25,7 +24,6 @@ def read_file(file):
 
 def get_moves(blueprint: Resources, robots: Resources, resources: Resources):
 
-    start = perf_counter()
     moves = []
 
     # If I can afford geode, always buy it
@@ -33,16 +31,16 @@ def get_moves(blueprint: Resources, robots: Resources, resources: Resources):
         return [3]
 
     # For other resources check if I can afford and if it makes any sense to buy it
-    if resources.ore >= blueprint.ore.ore and \
-            robots.ore < max(blueprint.ore.ore, blueprint.clay.ore, blueprint.obsidian.ore, blueprint.geode.ore):
-        moves.append(0)
+    if resources.ore >= blueprint.obsidian.ore and resources.clay >= blueprint.obsidian.clay and \
+            robots.obsidian < blueprint.geode.obsidian:
+        moves.append(2)
 
     if resources.ore >= blueprint.clay.ore and robots.clay < blueprint.obsidian.clay:
         moves.append(1)
 
-    if resources.ore >= blueprint.obsidian.ore and resources.clay >= blueprint.obsidian.clay and \
-            robots.obsidian < blueprint.geode.obsidian:
-        moves.append(2)
+    if resources.ore >= blueprint.ore.ore and \
+            robots.ore < max(blueprint.ore.ore, blueprint.clay.ore, blueprint.obsidian.ore, blueprint.geode.ore):
+        moves.append(0)
 
     # Wait one turn if there are no moves or you can buy a robot if you wait
     if not moves or (ore := resources.ore + robots.ore) >= blueprint.ore.ore and 0 not in moves or \
@@ -54,21 +52,7 @@ def get_moves(blueprint: Resources, robots: Resources, resources: Resources):
     return moves
 
 
-@cache
-def solve(time, blueprint: Resources, robots: Resources, resources: Resources):
 
-    return max((robots.geode +
-                solve(
-                    time - 1,
-                    blueprint,
-                    Resources._make(
-                        robots[i] + (1 if i == move else 0) for i in range(4)
-                    ),
-                    Resources._make(
-                        resources[i] + robots[i] - (blueprint[move][i] if move is not None else 0) for i in range(4)
-                    )
-                )
-                for move in (get_moves(blueprint, robots, resources) if time else [])), default=0)
 
 def solve2(time, blueprint: Resources) -> int:
 
@@ -116,12 +100,42 @@ def determine_quality(id, blueprint, time) -> int:
 
     robots = Resources(1)
     resources = Resources()
+    potential = 0
 
-    r = solve(time, blueprint, robots, resources) * id
+    @cache
+    def solve(time, robots: Resources, resources: Resources):
+        # if robots.geode == 2:
+        #     cycles = time // resources.geode + 1
+        #     last = time % resources.geode
+        #     return (cycles + 1) * (resources.geode * cycles / 2 + last) - resources.geode
+        nonlocal potential
+
+        branch_potential = resources.geode + robots.geode * time
+
+        if branch_potential >= potential:
+            potential = branch_potential
+        else:
+            return 0
+
+        return max((robots.geode +
+                    solve(
+                        time - 1,
+                        Resources._make(
+                            robots[i] + (1 if i == move else 0) for i in range(4)
+                        ),
+                        Resources._make(
+                            resources[i] + robots[i] - (blueprint[move][i] if move is not None else 0) for i in range(4)
+                        )
+                    )
+                    for move in (get_moves(blueprint, robots, resources) if time else [])), default=0)
+
+    r = solve(time, robots, resources) * id
 
     profiler.disable()
     ps = pstats.Stats(profiler).sort_stats('tottime')
     ps.print_stats()
+
+    print(solve.cache_info())
 
     return r
 
@@ -147,4 +161,4 @@ def day19_2(file):
 
 
 if __name__ == '__main__':
-    print(day19_1('day19.txt'))
+    print(day19_1('day19t.txt'))
