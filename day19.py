@@ -100,7 +100,8 @@ def determine_quality(id, blueprint, time) -> int:
 
     robots = Resources(1)
     resources = Resources()
-    potential = 0
+
+    potential = {i: 0 for i in range(25)}
 
     @cache
     def solve(time, robots: Resources, resources: Resources):
@@ -110,10 +111,10 @@ def determine_quality(id, blueprint, time) -> int:
         #     return (cycles + 1) * (resources.geode * cycles / 2 + last) - resources.geode
         nonlocal potential
 
-        branch_potential = resources.geode + robots.geode * time
+        branch_potential = resources.geode + robots.geode * time + (time - 1) * (time - 2) / 2
 
-        if branch_potential >= potential:
-            potential = branch_potential
+        if branch_potential >= potential[time]:
+            potential[time] = branch_potential
         else:
             return 0
 
