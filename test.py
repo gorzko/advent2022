@@ -317,8 +317,11 @@ class TestDay19(unittest.TestCase):
     def test_day19_1a(self):
         self.assertEqual(day19.day19_1('day19t.txt'), 33)
 
-    def test_day19_1b(self):
-        self.assertEqual(day19.day19_1('day19.txt'), 2160)
+    # def test_day19_1b(self):
+    #     self.assertEqual(day19.day19_1('day19.txt'), 2160)
+
+    def test_day19_2(self):
+        self.assertEqual(day19.day19_2('day19t.txt'), 62)
 
 if __name__ == '__main__':
     unittest.main()

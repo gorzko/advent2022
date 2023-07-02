@@ -52,48 +52,7 @@ def get_moves(blueprint: Resources, robots: Resources, resources: Resources):
     return moves
 
 
-
-
-def solve2(time, blueprint: Resources) -> int:
-
-    stack = []
-
-    max_geodes = 0
-
-    robots = Resources(1)
-    resources = Resources()
-
-    stack.append((time, robots, resources))
-
-    while stack:
-
-        time, robots, resources = stack.pop()
-
-        if (time, robots, resources) in stack:
-
-            print('wtf')
-
-        if time > 0:
-
-            stack += (
-                (
-                    time - 1,
-                    Resources._make(
-                        robots[i] + (1 if i == move else 0) for i in range(4)
-                    ),
-                    Resources._make(
-                        resources[i] + robots[i] - (blueprint[move][i] if move is not None else 0) for i in range(4)
-                    )
-                 )
-            for move in get_moves(blueprint, robots, resources))
-
-        elif resources.geode > max_geodes:
-
-            max_geodes = resources.geode
-
-    return max_geodes
-
-def determine_quality(id, blueprint, time) -> int:
+def determine_quality(blueprint_id, blueprint, time) -> int:
 
     profiler = cProfile.Profile()
     profiler.enable()
@@ -101,26 +60,19 @@ def determine_quality(id, blueprint, time) -> int:
     robots = Resources(1)
     resources = Resources()
 
-    potential = {i: 0 for i in range(25)}
+    potential = 0
 
     @cache
-    def solve(time, robots: Resources, resources: Resources):
-        # if robots.geode == 2:
-        #     cycles = time // resources.geode + 1
-        #     last = time % resources.geode
-        #     return (cycles + 1) * (resources.geode * cycles / 2 + last) - resources.geode
+    def solve(time_left, robots: Resources, resources: Resources):
+
         nonlocal potential
 
-        branch_potential = resources.geode + robots.geode * time + (time - 1) * (time - 2) / 2
-
-        if branch_potential >= potential[time]:
-            potential[time] = branch_potential
-        else:
+        if potential >= resources.geode + robots.geode * time_left + time_left * (time_left - 1) // 2:
             return 0
 
-        return max((robots.geode +
-                    solve(
-                        time - 1,
+        max_geodes = max((robots.geode +
+                          solve(
+                              time_left - 1,
                         Resources._make(
                             robots[i] + (1 if i == move else 0) for i in range(4)
                         ),
@@ -128,15 +80,17 @@ def determine_quality(id, blueprint, time) -> int:
                             resources[i] + robots[i] - (blueprint[move][i] if move is not None else 0) for i in range(4)
                         )
                     )
-                    for move in (get_moves(blueprint, robots, resources) if time else [])), default=0)
+                          for move in (get_moves(blueprint, robots, resources) if time_left else [])), default=0)
 
-    r = solve(time, robots, resources) * id
+        potential = max(potential, max_geodes)
+
+        return max_geodes
+
+    r = solve(time, robots, resources) * blueprint_id
 
     profiler.disable()
     ps = pstats.Stats(profiler).sort_stats('tottime')
     ps.print_stats()
-
-    print(solve.cache_info())
 
     return r
 
@@ -145,9 +99,7 @@ def day19_1(file):
 
     blueprints = read_file(file)
 
-    # return solve2(24, blueprints[1])
-
-    # return solve(24, blueprints[1], Resources(1), Resources())
+    # return determine_quality(1, blueprints[1], 24)
 
     with mp.Pool(mp.cpu_count() - 1) as p:
         return sum(p.starmap(determine_quality, ((i, blueprints[i], 24) for i in blueprints)))
@@ -157,9 +109,12 @@ def day19_2(file):
 
     blueprints = read_file(file)
 
-    with mp.Pool(mp.cpu_count() - 1) as p:
-        return p.starmap(determine_quality, ((1, blueprints[i], 32) for i in range(1, 4) if i in blueprints))
+
+    return determine_quality(1, blueprints[1], 32)
+
+    # with mp.Pool(mp.cpu_count() - 1) as p:
+    #     return p.starmap(determine_quality, ((1, blueprints[i], 32) for i in range(1, 4) if i in blueprints))
 
 
 if __name__ == '__main__':
-    print(day19_1('day19.txt'))
+    print(day19_2('day19t.txt'))
