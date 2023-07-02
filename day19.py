@@ -162,4 +162,4 @@ def day19_2(file):
 
 
 if __name__ == '__main__':
-    print(day19_1('day19t.txt'))
+    print(day19_1('day19.txt'))
