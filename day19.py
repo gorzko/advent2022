@@ -29,11 +29,11 @@ def get_moves(blueprint: Resources, robots: Resources, resources: Resources):
     moves = []
 
     # If I can afford geode, always buy it
-    if resources.ore >= blueprint.geode.ore and resources.obsidian >= blueprint.geode.obsidian:
+    if resources.obsidian >= blueprint.geode.obsidian and resources.ore >= blueprint.geode.ore:
         return [3]
 
     # For other resources check if I can afford and if it makes any sense to buy it
-    if resources.ore >= blueprint.obsidian.ore and resources.clay >= blueprint.obsidian.clay and \
+    if resources.clay >= blueprint.obsidian.clay and resources.ore >= blueprint.obsidian.ore and \
             robots.obsidian < blueprint.geode.obsidian:
         moves.append(2)
 
@@ -45,10 +45,10 @@ def get_moves(blueprint: Resources, robots: Resources, resources: Resources):
         moves.append(0)
 
     # Wait one turn if there are no moves or you can buy a robot if you wait
-    if not moves or (ore := resources.ore + robots.ore) >= blueprint.ore.ore and 0 not in moves or \
+    if not moves or (ore := resources.ore + robots.ore * 2) >= blueprint.ore.ore and 0 not in moves or \
         1 not in moves and ore >= blueprint.clay.ore or \
-        ore >= blueprint.obsidian.ore and resources.clay + 3 * robots.clay >= blueprint.obsidian.clay or \
-        ore >= blueprint.geode.ore and resources.obsidian + robots.obsidian >= blueprint.geode.obsidian:
+        ore >= blueprint.obsidian.ore and resources.clay + robots.clay * 2 >= blueprint.obsidian.clay or \
+        ore >= blueprint.geode.ore and resources.obsidian + robots.obsidian * 2 >= blueprint.geode.obsidian:
         moves.append(None)
 
     return moves
@@ -62,17 +62,17 @@ def determine_quality(blueprint_id, blueprint, time) -> int:
     robots = Resources(1)
     resources = Resources()
 
-    potential = 0
+    max_geodes = 0
 
     @cache
     def solve(time_left, robots: Resources, resources: Resources):
 
-        nonlocal potential
+        nonlocal max_geodes
 
-        if potential >= resources.geode + robots.geode * time_left + time_left * (time_left - 1) // 2:
+        if max_geodes >= resources.geode + robots.geode * time_left + time_left * (time_left - 1) // 2 or not time_left:
             return 0
 
-        max_geodes = max((robots.geode +
+        potential = max((robots.geode +
                           solve(
                               time_left - 1,
                         Resources._make(
@@ -82,11 +82,14 @@ def determine_quality(blueprint_id, blueprint, time) -> int:
                             resources[i] + robots[i] - (blueprint[move][i] if move is not None else 0) for i in range(4)
                         )
                     )
-                          for move in (get_moves(blueprint, robots, resources) if time_left else [])), default=0)
+                          for move in (get_moves(blueprint, robots, resources))), default=0)
 
-        potential = max(potential, max_geodes)
+        max_geodes = max(max_geodes, potential)
 
-        return max_geodes
+        return potential
+
+    # optimization hint: return value & max on list comprehension are not needed, because max_geodes always stores the
+    # right value
 
     r = solve(time, robots, resources) * blueprint_id
 
@@ -112,11 +115,11 @@ def day19_2(file):
     blueprints = read_file(file)
 
 
-    return determine_quality(1, blueprints[1], 32)
+    # return determine_quality(1, blueprints[1], 32)
 
-    # with mp.Pool(mp.cpu_count() - 1) as p:
-        # return reduce(mul, p.starmap(determine_quality, ((1, blueprints[i], 32) for i in range(1, 4) if i in blueprints)))
+    with mp.Pool(mp.cpu_count() - 1) as p:
+        return reduce(mul, p.starmap(determine_quality, ((1, blueprints[i], 32) for i in range(1, 4) if i in blueprints)))
 
 
 if __name__ == '__main__':
-    print(day19_1('day19t.txt'))
+    print(day19_2('day19.txt'))
