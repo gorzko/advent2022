@@ -3,6 +3,8 @@ from functools import cache
 import multiprocessing as mp
 import cProfile
 import pstats
+from functools import reduce
+from  operator import mul
 
 Resources = namedtuple('Resources', ['ore', 'clay', 'obsidian', 'geode'], defaults=(0, 0, 0, 0))
 
@@ -113,8 +115,8 @@ def day19_2(file):
     return determine_quality(1, blueprints[1], 32)
 
     # with mp.Pool(mp.cpu_count() - 1) as p:
-    #     return p.starmap(determine_quality, ((1, blueprints[i], 32) for i in range(1, 4) if i in blueprints))
+        # return reduce(mul, p.starmap(determine_quality, ((1, blueprints[i], 32) for i in range(1, 4) if i in blueprints)))
 
 
 if __name__ == '__main__':
-    print(day19_2('day19t.txt'))
+    print(day19_1('day19t.txt'))
